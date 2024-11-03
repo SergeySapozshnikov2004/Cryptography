@@ -14,28 +14,6 @@ std::vector<double> vec_in_mod (std::vector<double> v, int m)
     return v;
 }
 
-// std::vector<double> negative_wrapped_convolution(std::vector<double> u, std::vector<double> v, int K) {
-//     std::vector<double> return_vec;
-//     int left_arg = 0;
-//     int right_arg = 0;
-
-
-//     for (int i = 0; i < K; ++i) {
-//         for (int j = 0; j < K; j++) {
-//             left_arg += u[(i - j + K) % K] * v[j]; 
-//         }
-
-//         for (int j = 0; j < std::min(i, K); j++) { 
-//             right_arg += u[(i - j)] * v[j]; 
-//         }
-//         return_vec.push_back(double(left_arg - right_arg));
-//         left_arg = 0;
-//         right_arg = 0;
-//     }
-//     std::vector<double> v_1 = vec_in_mod(return_vec, K);
-//     return v_1;
-// }
-
 std::vector<double> negative_wrapped_convolution(std::vector<double> u,std::vector<double> v, int K)
 {
     std::vector<double> return_vec;
@@ -83,7 +61,6 @@ std::vector<double> clustering_vec(std::vector<double> bin_vec, int K, int L)
         for(size_t j = i * K; j < i * K + L ; ++j)
         {
             cluster.push_back(bin_vec[j]);
-            // std::cout << bin_vec[j] << "!";
         }
         all_vec.push_back(cluster);
         cluster.clear();
@@ -93,9 +70,7 @@ std::vector<double> clustering_vec(std::vector<double> bin_vec, int K, int L)
     for(size_t i = 0; i < all_vec.size(); ++i)
     {
         return_vec.push_back(vec_in_num(all_vec[i]));
-        // std::cout<<vec_in_num(all_vec[i]);
     }
-    // std::reverse(return_vec.begin(), return_vec.end());
     return return_vec;
 }
 
@@ -109,8 +84,8 @@ std::vector<double> convert_to_binary(int a)
     }
     binary_vec.push_back(1);
     
-    int size = binary_vec.size();
-    int pow_two = 1;
+    size_t size = binary_vec.size();
+    size_t pow_two = 1;
     int n = 0;
 
     while (pow_two <= size)
@@ -139,8 +114,7 @@ int shonhage_shtrassen(int u, int v)
 {
     std::vector<double> u_vec = convert_to_binary(u);
     std::vector<double> v_vec = convert_to_binary(v);
-    // Matrix(u_vec).print();
-    int N = u_vec.size();
+    size_t   N = u_vec.size();
 
     int n = 0;
     while (N != 1)
@@ -148,21 +122,16 @@ int shonhage_shtrassen(int u, int v)
         N /= 2;
         n++;
     }
-    int l = n / 2;
-    int k = n - l;
-    int K = pow(2,k);
-    int L = pow(2, l);
-    // std::cout << K << L;
-
+    size_t l = n / 2;
+    size_t k = n - l;
+    size_t K = pow(2,k);
+    size_t L = pow(2, l);
+    
     std::vector<double> u_clust = clustering_vec(u_vec, K, L);
-    // Matrix(u_clust).print();
     std::vector<double> v_clust = clustering_vec(v_vec, K, L);
-    // Matrix(negative_wrapped_convolution(u_clust, v_clust, K)).print();
     std::vector<double> w = negative_wrapped_convolution(u_clust, v_clust, K);
-    // Matrix(w).print();
     int psi = pow(2, 2.0 * L / K);
-    // std::cout << psi;
-
+    
     std::vector<double> u_psi;
     std::vector<double> v_psi;
     std::reverse(u_clust.begin(), u_clust.end());
@@ -175,8 +144,7 @@ int shonhage_shtrassen(int u, int v)
     {
         v_psi.push_back(v_clust[i] * pow(psi, i));
     }
-    // Matrix(v_psi).print();
-
+    
     int m = pow(2, 2*L) + 1;
     int omega = pow(2, 4.0 * L / K);
 
@@ -184,40 +152,29 @@ int shonhage_shtrassen(int u, int v)
     Matrix v_dpf = Matrix(v_psi).dpf(m, omega, K);
     std::vector<double> u_dpf_1 = u_dpf.transposition().get_vector();
     std::vector<double> v_dpf_1 = v_dpf.transposition().get_vector();
-    // std::cout<<u_dpf_1.size();
-    // Matrix(u_dpf_1).print();
     std::vector<double> c;
     for (size_t i = 0; i < u_dpf_1.size(); ++ i)
     {
         c.push_back(u_dpf_1[i] * v_dpf_1[i]);
     }
     c = vec_in_mod(c, m);
-    // Matrix(c).print();
     int inv_omega = -1 * pow(2, 2* L - 4.0 * L / K); 
     int inv_k = -1 * pow(2,2 * L - k);
     Matrix c_matrix = Matrix(c);
 
     Matrix d = c_matrix.dpf(m, inv_omega, 4) * inv_k;
     d.matrix_mod(m);
-    // d.print();
     std::vector<double> d_vector = d.transposition().get_vector();
-    // std::cout<< d_vector.size();
     std::vector<double> w_final;
     for(size_t i = 0; i < d_vector.size(); ++i)
     {
         w_final.push_back(d_vector[i] / pow(psi, i));
     }
-    // Matrix(w_final).print();
-    // std::cout<<d.get_matrix().size();
-    // Matrix(w).print();
-    // Matrix(w_final).print();
     Matrix w_check =  (Matrix(w) - Matrix(w_final)) ;
     w_check.matrix_mod(K);
 
     w_check = w_check + w_final;
-    // w_check.print();
     std::vector<double> w_check_vec = w_check.transposition().get_vector();
-    // std::cout << w_vec.size();
     
     std::vector<double> w_return;
     for(size_t i = 0; i < K; ++i)
@@ -243,7 +200,6 @@ int shonhage_shtrassen(int u, int v)
 
 int main()
 {   
-    std::cout << shonhage_shtrassen(21, 21);
-    // std::cout<< "!"<< vec_in_num({1,0,0,1,1,0,1}) <<"!";
+    std::cout << shonhage_shtrassen(21, 25);
     return 0;
 }

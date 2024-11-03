@@ -8,7 +8,7 @@
 #include <vector>
 
 
-Matrix::Matrix(int num_rows, int num_columns)
+Matrix::Matrix(size_t num_rows, size_t num_columns)
 {
     if (num_rows <= 0 || num_columns <= 0)
     {
@@ -36,6 +36,7 @@ Matrix::Matrix(std::vector<double> vec)
         matrix.push_back({vec[i]});
     }
 }
+
 
 Matrix::Matrix(std::vector<std::vector<double>> matrix)
 {
@@ -211,8 +212,8 @@ Matrix Matrix::inverse_matrix_from_unit()
                 matrix_1.matrix[i] = vector_minus(matrix_1.matrix[i], vector_mult(matrix_1.matrix[i0], matrix_1.matrix[i][i0]));
             }
         }
-    }
-    return inverse_matrix;
+    }                           
+    return inverse_matrix;      
 }
 
 double Matrix::determinant_manual()

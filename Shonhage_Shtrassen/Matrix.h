@@ -12,7 +12,7 @@ class Matrix
 /// @brief конструирует матрицу размерностью num_rows X num_columns)
 /// @param num_rows число строк
 /// @param num_columns число столбцов
-Matrix(int num_rows, int num_columns);
+Matrix(size_t num_rows, size_t num_columns);
 
 /**
  * @brief конструирует матрицу по заданному вектору векторов
@@ -56,6 +56,14 @@ Matrix operator*(const double& other);
 /// @param matrix 
 /// @return Matrix
 Matrix& operator=(const Matrix& matrix);
+
+// /**
+//  * @brief Оператор присаивания перемещением
+//  * 
+//  * @param other 
+//  * @return Matrix 
+//  */
+// Matrix operator=(const Matrix&& other) noexcept;
 
 /// @brief выводит матрицу
 void print();
