@@ -5,7 +5,14 @@
 #include <vector>
 #include <cmath>
 
-std::vector<double> vec_in_mod (std::vector<double> v, int m)
+/**
+ * @brief Вычисляет значение вектора по модулю
+ * 
+ * @param v - вектор
+ * @param m - модуль
+ * @return std::vector<double> v (mod m) 
+ */
+std::vector<double> vec_in_mod (std::vector<double> v,const int m)
 {
     for(size_t j = 0; j < v.size(); ++j)
         {
@@ -14,7 +21,15 @@ std::vector<double> vec_in_mod (std::vector<double> v, int m)
     return v;
 }
 
-std::vector<double> negative_wrapped_convolution(std::vector<double> u,std::vector<double> v, int K)
+/**
+ * @brief Отрицательно обёрнутая свёртка
+ * 
+ * @param u - первый вектор
+ * @param v - второй вектор
+ * @param K - коэффициент
+ * @return std::vector<double> вектор содержащий значения отрицательно обёрнутой свёртки 
+ */
+std::vector<double> negative_wrapped_convolution(std::vector<double> u,std::vector<double> v,const int K)
 {
     std::vector<double> return_vec;
 
@@ -41,7 +56,12 @@ std::vector<double> negative_wrapped_convolution(std::vector<double> u,std::vect
 }
 
 
-
+/**
+ * @brief конвертирует вектор коэффициентов многочлена в число
+ * 
+ * @param vec входной вектор коэффициентов
+ * @return double число
+ */
 double vec_in_num(std::vector<double> vec)
 {
     double a = 0;
@@ -52,7 +72,15 @@ double vec_in_num(std::vector<double> vec)
     return a;
 }
 
-std::vector<double> clustering_vec(std::vector<double> bin_vec, int K, int L)
+/**
+ * @brief кластеризирует двоичное число на L-разрядные фрагменты и конвертирует эти фрагменты в десятичную систему исчисление
+ * 
+ * @param bin_vec вектор нулей и единиц
+ * @param K количество групп чисел
+ * @param L количество разрядов в группе
+ * @return std::vector<double> вектор из K десятичных элементов
+ */
+std::vector<double> clustering_vec(std::vector<double> bin_vec,const int K,const int L)
 {
     std::vector<double> cluster;
     std::vector<std::vector<double>> all_vec; 
@@ -74,6 +102,12 @@ std::vector<double> clustering_vec(std::vector<double> bin_vec, int K, int L)
     return return_vec;
 }
 
+/**
+ * @brief конвертирует исходное число в двоичное
+ * 
+ * @param a число
+ * @return std::vector<double> вектор с нулями и единицами 
+ */
 std::vector<double> convert_to_binary(int a)
 {
     std::vector<double> binary_vec;
@@ -110,6 +144,13 @@ std::vector<double> convert_to_binary(int a)
     return binary_vec;
 }
 
+/**
+ * @brief Выпоолняет быстрое умножение по алгоритму Шонхаге-Штрассена
+ * 
+ * @param u первое число
+ * @param v второе число
+ * @return int u*v
+ */
 int shonhage_shtrassen(int u, int v)
 {
     std::vector<double> u_vec = convert_to_binary(u);
