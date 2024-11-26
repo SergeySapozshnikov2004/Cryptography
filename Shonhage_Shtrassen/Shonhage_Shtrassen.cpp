@@ -1,0 +1,246 @@
+#include "Matrix.cpp"
+#include <cstddef>
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <cmath>
+
+/**
+ * @brief Вычисляет значение вектора по модулю
+ * 
+ * @param v - вектор
+ * @param m - модуль
+ * @return std::vector<double> v (mod m) 
+ */
+std::vector<double> vec_in_mod (std::vector<double> v,const int m)
+{
+    for(size_t j = 0; j < v.size(); ++j)
+        {
+            v[j] = double(int(v[j]) % m); 
+        }
+    return v;
+}
+
+/**
+ * @brief Отрицательно обёрнутая свёртка
+ * 
+ * @param u - первый вектор
+ * @param v - второй вектор
+ * @param K - коэффициент
+ * @return std::vector<double> вектор содержащий значения отрицательно обёрнутой свёртки 
+ */
+std::vector<double> negative_wrapped_convolution(std::vector<double> u,std::vector<double> v,const int K)
+{
+    std::vector<double> return_vec;
+
+    int left_arg = 0;
+    int right_arg = 0;
+    for (size_t i = 0; i < K ; ++i) 
+    {
+        for (int j = 0; j < K; j++)
+        {
+            left_arg += u[(i - j + K) % K] * v[j];
+        }
+
+        for (int j = 0; j < i; j++)
+        {
+            right_arg += u[(i - j)] * v[j];
+        }
+        return_vec.push_back(double(left_arg - right_arg));
+        left_arg = 0;
+        right_arg = 0;
+    }
+
+    std::vector<double> v_1 = vec_in_mod(return_vec, K);
+    return v_1;
+}
+
+
+/**
+ * @brief конвертирует вектор коэффициентов многочлена в число
+ * 
+ * @param vec входной вектор коэффициентов
+ * @return double число
+ */
+double vec_in_num(std::vector<double> vec)
+{
+    double a = 0;
+    for(size_t i = 0; i < vec.size(); ++i)
+    {
+        a += vec[i] * pow(2, vec.size() - i - 1);
+    }
+    return a;
+}
+
+/**
+ * @brief кластеризирует двоичное число на L-разрядные фрагменты и конвертирует эти фрагменты в десятичную систему исчисление
+ * 
+ * @param bin_vec вектор нулей и единиц
+ * @param K количество групп чисел
+ * @param L количество разрядов в группе
+ * @return std::vector<double> вектор из K десятичных элементов
+ */
+std::vector<double> clustering_vec(std::vector<double> bin_vec,const int K,const int L)
+{
+    std::vector<double> cluster;
+    std::vector<std::vector<double>> all_vec; 
+    for (size_t i = 0; i < K; ++i)
+    {
+        for(size_t j = i * K; j < i * K + L ; ++j)
+        {
+            cluster.push_back(bin_vec[j]);
+        }
+        all_vec.push_back(cluster);
+        cluster.clear();
+    }
+
+    std::vector<double> return_vec;
+    for(size_t i = 0; i < all_vec.size(); ++i)
+    {
+        return_vec.push_back(vec_in_num(all_vec[i]));
+    }
+    return return_vec;
+}
+
+/**
+ * @brief конвертирует исходное число в двоичное
+ * 
+ * @param a число
+ * @return std::vector<double> вектор с нулями и единицами 
+ */
+std::vector<double> convert_to_binary(int a)
+{
+    std::vector<double> binary_vec;
+    while (a != 1)
+    {
+        binary_vec.push_back(a % 2);
+        a /= 2;
+    }
+    binary_vec.push_back(1);
+    
+    size_t size = binary_vec.size();
+    size_t pow_two = 1;
+    int n = 0;
+
+    while (pow_two <= size)
+    {
+        pow_two *= 2;
+        ++n;
+    }
+
+    for(size_t i = 0; i < pow_two - size; ++i)
+    {
+        binary_vec.push_back(0);
+    }
+
+    size = binary_vec.size();
+    for(size_t i = 0; i < size; ++i)
+    {
+        binary_vec.push_back(0);
+    }
+
+    std::reverse(binary_vec.begin(), binary_vec.end());
+
+    return binary_vec;
+}
+
+/**
+ * @brief Выпоолняет быстрое умножение по алгоритму Шонхаге-Штрассена
+ * 
+ * @param u первое число
+ * @param v второе число
+ * @return int u*v
+ */
+int shonhage_shtrassen(int u, int v)
+{
+    std::vector<double> u_vec = convert_to_binary(u);
+    std::vector<double> v_vec = convert_to_binary(v);
+    size_t   N = u_vec.size();
+
+    int n = 0;
+    while (N != 1)
+    {
+        N /= 2;
+        n++;
+    }
+    size_t l = n / 2;
+    size_t k = n - l;
+    size_t K = pow(2,k);
+    size_t L = pow(2, l);
+    
+    std::vector<double> u_clust = clustering_vec(u_vec, K, L);
+    std::vector<double> v_clust = clustering_vec(v_vec, K, L);
+    std::vector<double> w = negative_wrapped_convolution(u_clust, v_clust, K);
+    int psi = pow(2, 2.0 * L / K);
+    
+    std::vector<double> u_psi;
+    std::vector<double> v_psi;
+    std::reverse(u_clust.begin(), u_clust.end());
+    std::reverse(v_clust.begin(), v_clust.end());
+    for(size_t i = 0; i < u_clust.size(); ++i)
+    {
+        u_psi.push_back(u_clust[i] * pow(psi, i));
+    }
+    for(size_t i = 0; i < v_clust.size(); ++i)
+    {
+        v_psi.push_back(v_clust[i] * pow(psi, i));
+    }
+    
+    int m = pow(2, 2*L) + 1;
+    int omega = pow(2, 4.0 * L / K);
+
+    Matrix u_dpf = Matrix(u_psi).dpf(m, omega, K);
+    Matrix v_dpf = Matrix(v_psi).dpf(m, omega, K);
+    std::vector<double> u_dpf_1 = u_dpf.transposition().get_vector();
+    std::vector<double> v_dpf_1 = v_dpf.transposition().get_vector();
+    std::vector<double> c;
+    for (size_t i = 0; i < u_dpf_1.size(); ++ i)
+    {
+        c.push_back(u_dpf_1[i] * v_dpf_1[i]);
+    }
+    c = vec_in_mod(c, m);
+    int inv_omega = -1 * pow(2, 2* L - 4.0 * L / K); 
+    int inv_k = -1 * pow(2,2 * L - k);
+    Matrix c_matrix = Matrix(c);
+
+    Matrix d = c_matrix.dpf(m, inv_omega, 4) * inv_k;
+    d.matrix_mod(m);
+    std::vector<double> d_vector = d.transposition().get_vector();
+    std::vector<double> w_final;
+    for(size_t i = 0; i < d_vector.size(); ++i)
+    {
+        w_final.push_back(d_vector[i] / pow(psi, i));
+    }
+    Matrix w_check =  (Matrix(w) - Matrix(w_final)) ;
+    w_check.matrix_mod(K);
+
+    w_check = w_check + w_final;
+    std::vector<double> w_check_vec = w_check.transposition().get_vector();
+    
+    std::vector<double> w_return;
+    for(size_t i = 0; i < K; ++i)
+    {    
+        if (w_check_vec[i] < (i+1) * pow(2, 2 * L))
+        {
+            w_return.push_back(w_check_vec[i]);
+        }
+        else
+        {
+            w_return.push_back(w_check_vec[i] - K * (pow(2, 2*L) + 1));
+        }
+    }
+
+    int y = 0;
+    for (size_t i = 0; i < K; ++i)
+    {
+        y += w_final[i] * pow(2, L * i);
+    }
+
+    return y;
+}
+
+int main()
+{   
+    std::cout << shonhage_shtrassen(21, 25);
+    return 0;
+}
